@@ -110,7 +110,7 @@
         resultText += 'Date: ' + date + '<br>';
         resultText += 'Water Percentage: ' + waterPercentage + '%<br>';
         resultText += 'Sediment Percentage: ' + sedimentPercentage + '%<br>';
-        resultHtml += '<p>FFA: ' + (ffa / 2) + '</p>';
+        resultText += 'FFA: ' + (ffa / 2) + '<br>';
         resultText += 'Deduction Percentage: ' + deductionPercentage + '%';
 
         $('#result').html(resultText);
@@ -129,6 +129,16 @@
       return sedimentPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
     }
 
+    function calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffa) {
+      var deductionPercentage = 0;
+      var sumPercentage = waterPercentage + sedimentPercentage;
+      
+      if (sumPercentage > 2 || ffa > 6) {
+        deductionPercentage = sumPercentage - 2 + (ffa / 2);
+      }
+      
+      return deductionPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
+    }
   </script>
 </body>
 </html>
