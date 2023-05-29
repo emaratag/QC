@@ -3,22 +3,9 @@
 <head>
   <title>Data Form</title>
   <style>
-    /* Styles for mobile-friendly layout */
-    @media only screen and (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      form {
-        margin-bottom: 20px;
-      }
-    }
-
-    /* Other styles */
     body {
       font-family: Arial, sans-serif;
       background-color: #f1f1f1;
-      padding: 20px;
     }
 
     h2 {
@@ -95,4 +82,63 @@
     <input type="submit" value="Submit">
   </form>
 
- 
+  <div id="result"></div>
+
+  <script>
+    $(document).ready(function() {
+      $('#dataForm').submit(function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        // Get form values
+        var representativeName = $('#representativeName').val();
+        var clientName = $('#clientName').val();
+        var date = $('#date').val();
+        var emptyBeakerWeight = parseFloat($('#emptyBeakerWeight').val());
+        var beforeBoiling = parseFloat($('#beforeBoiling').val());
+        var afterBoiling = parseFloat($('#afterBoiling').val());
+        var sedimentWeight = parseFloat($('#sedimentWeight').val());
+        var ffa = parseFloat($('#ffa').val());
+
+        // Perform calculations
+        var waterPercentage = calculateWaterPercentage(emptyBeakerWeight, beforeBoiling, afterBoiling);
+        var sedimentPercentage = calculateSedimentPercentage(sedimentWeight, beforeBoiling, emptyBeakerWeight);
+        var deductionPercentage = calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffa);
+
+        // Display result
+        var resultText = 'Representative Name: ' + representativeName + '<br>';
+        resultText += 'Client Name: ' + clientName + '<br>';
+        resultText += 'Date: ' + date + '<br>';
+        resultText += 'Water Percentage: ' + waterPercentage + '%<br>';
+        resultText += 'Sediment Percentage: ' + sedimentPercentage + '%<br>';
+        resultText += 'FFA: ' + ffa + '<br>';
+        resultText += 'Deduction Percentage: ' + deductionPercentage + '%';
+
+        $('#result').html(resultText);
+      });
+    });
+
+    function calculateWaterPercentage(emptyBeakerWeight, beforeBoiling, afterBoiling) {
+      var waterWeight = beforeBoiling - emptyBeakerWeight;
+      var totalWeightLoss = beforeBoiling - afterBoiling;
+      var waterPercentage = (totalWeightLoss / waterWeight) * 100;
+      return waterPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
+    }
+
+    function calculateSedimentPercentage(sedimentWeight, beforeBoiling, emptyBeakerWeight) {
+      var sedimentPercentage = ((sedimentWeight - emptyBeakerWeight) / (beforeBoiling - emptyBeakerWeight)) * 100;
+      return sedimentPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
+    }
+
+    function calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffa) {
+      var deductionPercentage = 0;
+      var sumPercentage = waterPercentage + sedimentPercentage;
+      
+      if (sumPercentage > 2 || ffa > 6) {
+        deductionPercentage = sumPercentage - 2 + (ffa / 2);
+      }
+      
+      return deductionPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
+    }
+  </script>
+</body>
+</html>
