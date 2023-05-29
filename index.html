@@ -56,28 +56,28 @@
   <h2>Data Form</h2>
   <form id="dataForm">
     <label for="representativeName">Representative Name:</label>
-    <input type="text" id="representativeName" name="representativeName" required>
+    <input type="text" id="representativeName" name="representativeName" required><br><br>
 
     <label for="clientName">Client Name:</label>
-    <input type="text" id="clientName" name="clientName" required>
+    <input type="text" id="clientName" name="clientName" required><br><br>
 
     <label for="date">Date:</label>
-    <input type="date" id="date" name="date" required>
+    <input type="date" id="date" name="date" required><br><br>
 
     <label for="emptyBeakerWeight">Empty Beaker Weight (g):</label>
-    <input type="number" id="emptyBeakerWeight" name="emptyBeakerWeight" step="0.01" required>
+    <input type="number" id="emptyBeakerWeight" name="emptyBeakerWeight" step="0.01" required><br><br>
 
     <label for="beforeBoiling">Weight Before Boiling (g):</label>
-    <input type="number" id="beforeBoiling" name="beforeBoiling" step="0.01" required>
+    <input type="number" id="beforeBoiling" name="beforeBoiling" step="0.01" required><br><br>
 
     <label for="afterBoiling">Weight After Boiling (g):</label>
-    <input type="number" id="afterBoiling" name="afterBoiling" step="0.01" required>
+    <input type="number" id="afterBoiling" name="afterBoiling" step="0.01" required><br><br>
 
     <label for="sedimentWeight">Weight of Sediment (g):</label>
-    <input type="number" id="sedimentWeight" name="sedimentWeight" step="0.01" required>
+    <input type="number" id="sedimentWeight" name="sedimentWeight" step="0.01" required><br><br>
 
     <label for="ffa">FFA:</label>
-    <input type="number" id="ffa" name="ffa" step="0.01" required>
+    <input type="number" id="ffa" name="ffa" step="0.01" required><br><br>
 
     <input type="submit" value="Submit">
   </form>
@@ -102,18 +102,21 @@
         // Perform calculations
         var waterPercentage = calculateWaterPercentage(emptyBeakerWeight, beforeBoiling, afterBoiling);
         var sedimentPercentage = calculateSedimentPercentage(sedimentWeight, beforeBoiling, emptyBeakerWeight);
-        var deductionPercentage = calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffa);
+        var ffaCalculation = calculateFFA(ffa);
+        var deductionPercentage = calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffaCalculation);
 
         // Display result
-        var resultText = 'Representative Name: ' + representativeName + '<br>';
-        resultText += 'Client Name: ' + clientName + '<br>';
-        resultText += 'Date: ' + date + '<br>';
-        resultText += 'Water Percentage: ' + waterPercentage + '%<br>';
-        resultText += 'Sediment Percentage: ' + sedimentPercentage + '%<br>';
-        resultText += 'FFA: ' + (ffa / 2) + '<br>';
-        resultText += 'Deduction Percentage: ' + deductionPercentage + '%';
+        var resultHtml = 'Representative Name: ' + representativeName + '<br>';
+        resultHtml += 'Client Name: ' + clientName + '<br>';
+        resultHtml += 'Date: ' + date + '<br><br>';
+        resultHtml += 'Water Percentage: ' + waterPercentage + '%<br>';
+        resultHtml += 'Sediment Percentage: ' + sedimentPercentage + '%<br>';
+        resultHtml += 'FFA: ' + ffaCalculation + '<br>';
+        resultHtml += 'Deduction Percentage: ' + deductionPercentage + '%';
+        $('#result').html(resultHtml);
 
-        $('#result').html(resultText);
+        // Save results to Google Sheets (implementation in later steps)
+        saveToGoogleSheets(representativeName, clientName, date, emptyBeakerWeight, beforeBoiling, afterBoiling, waterPercentage, sedimentWeight, sedimentPercentage, ffaCalculation, deductionPercentage);
       });
     });
 
@@ -129,16 +132,20 @@
       return sedimentPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
     }
 
+    function calculateFFA(ffa) {
+      var ffaCalculation = ffa / 2;
+      return ffaCalculation.toFixed(2); // Return FFA calculation rounded to 2 decimal places
+    }
+
     function calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffa) {
       var deductionPercentage = 0;
       var sumPercentage = waterPercentage + sedimentPercentage;
-      
-      if (sumPercentage > 2 || ffa > 6) {
-        deductionPercentage = sumPercentage - 2 + (ffa / 2);
+      if (sumPercentage > 2 && ffa > 3) {
+        deductionPercentage = ( sumPercentage - 2 ) + (ffa );
       }
-      
       return deductionPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
     }
+
   </script>
 </body>
 </html>
