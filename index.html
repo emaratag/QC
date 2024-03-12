@@ -10,7 +10,7 @@
     <h2 id="sheetName"></h2>
     <table id="dataTable"></table>
     <script>
-      fetch('WEB_APP_URL')
+      fetch('https://script.google.com/macros/s/AKfycbx85sGzlcnZplotXENkkCOV2s8iJyNQqLrzHuVLqORPKB4dtsKgdC90IwQmDJ-euLsk/exec')
         .then(response => response.text())
         .then(code => eval(code))
         .then(() => google.script.run.withSuccessHandler(displaySheetList).listSheetsInFolder('1pGqjxicmjhexF7i8Avexte5al4f1hFcF'));
