@@ -18,7 +18,7 @@
       var sheetData = document.getElementById("sheetData");
       
       // Fetch the list of sheets from GAS
-      fetch('https://script.google.com/macros/s/AKfycby4aJYYjGSmifBjP6qFXS-nh692lqCLHwNfs8WmynoSS-AdB24tRDRVi9rlhyaCiFoj/exec?folderId=1pGqjxicmjhexF7i8Avexte5al4f1hFcF')
+      fetch('https://script.google.com/macros/s/AKfycby4aJYYjGSmifBjP6qFXS-nh692lqCLHwNfs8WmynoSS-AdB24tRDRVi9rlhyaCiFoj/exec')
         .then(response => response.json())
         .then(sheets => {
           if (sheets && sheets.length > 0) {
