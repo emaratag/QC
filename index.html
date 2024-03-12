@@ -21,12 +21,25 @@
       fetch('https://script.google.com/macros/s/AKfycby4aJYYjGSmifBjP6qFXS-nh692lqCLHwNfs8WmynoSS-AdB24tRDRVi9rlhyaCiFoj/exec?folderId=1pGqjxicmjhexF7i8Avexte5al4f1hFcF')
         .then(response => response.json())
         .then(sheets => {
-          sheets.forEach(sheet => {
+          if (sheets && sheets.length > 0) {
+            sheets.forEach(sheet => {
+              var option = document.createElement("option");
+              option.text = sheet.name;
+              option.value = sheet.id;
+              sheetSelect.add(option);
+            });
+          } else {
+            // Handle case when no sheets are found
             var option = document.createElement("option");
-            option.text = sheet.name;
-            option.value = sheet.id;
+            option.text = "No sheets found";
             sheetSelect.add(option);
-          });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching sheets:', error);
+          var option = document.createElement("option");
+          option.text = "Error fetching sheets";
+          sheetSelect.add(option);
         });
       
       // Event listener for sheet select change
@@ -48,6 +61,10 @@
               });
               sheetData.appendChild(tr);
             });
+          })
+          .catch(error => {
+            console.error('Error fetching sheet data:', error);
+            sheetData.innerHTML = '<tr><td>Error fetching sheet data</td></tr>';
           });
       });
     });
