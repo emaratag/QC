@@ -1,51 +1,56 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <title>Sheet Viewer</title>
-  </head>
-  <body>
-    <h1>Select a Sheet</h1>
-    <div id="sheetList"></div>
-    <h2 id="sheetName"></h2>
-    <table id="dataTable"></table>
-    <script>
-      fetch('https://script.google.com/macros/s/AKfycbx85sGzlcnZplotXENkkCOV2s8iJyNQqLrzHuVLqORPKB4dtsKgdC90IwQmDJ-euLsk/exec')
-        .then(response => response.text())
-        .then(code => eval(code))
-        .then(() => google.script.run.withSuccessHandler(displaySheetList).listSheetsInFolder('1pGqjxicmjhexF7i8Avexte5al4f1hFcF'));
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Sheets Viewer</title>
+</head>
+<body>
+  <h1>Select a Sheet:</h1>
+  <select id="sheetSelect"></select>
+  <br><br>
+  <h2>Sheet Data:</h2>
+  <table id="sheetData"></table>
 
-      function displaySheetList(sheets) {
-        const sheetList = document.getElementById('sheetList');
-        for (const sheet of sheets) {
-          const link = document.createElement('a');
-          link.href = '#';
-          link.textContent = sheet.name;
-          link.onclick = () => loadSheetData(sheet.id, sheet.name);
-          sheetList.appendChild(link);
-          sheetList.appendChild(document.createElement('br'));
-        }
-      }
-
-      function loadSheetData(sheetId, sheetName) {
-        google.script.run.withSuccessHandler(displaySheetData).getSheetData(sheetId);
-        document.getElementById('sheetName').textContent = `Sheet: ${sheetName}`;
-      }
-
-      function displaySheetData(data) {
-        const table = document.getElementById('dataTable');
-        table.innerHTML = '';
-
-        for (const row of data) {
-          const tr = document.createElement('tr');
-          for (const cell of row) {
-            const td = document.createElement('td');
-            td.textContent = cell;
-            tr.appendChild(td);
-          }
-          table.appendChild(tr);
-        }
-      }
-    </script>
-  </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var sheetSelect = document.getElementById("sheetSelect");
+      var sheetData = document.getElementById("sheetData");
+      
+      // Fetch the list of sheets from GAS
+      fetch('https://script.google.com/macros/s/AKfycby4aJYYjGSmifBjP6qFXS-nh692lqCLHwNfs8WmynoSS-AdB24tRDRVi9rlhyaCiFoj/exec?folderId=1pGqjxicmjhexF7i8Avexte5al4f1hFcF')
+        .then(response => response.json())
+        .then(sheets => {
+          sheets.forEach(sheet => {
+            var option = document.createElement("option");
+            option.text = sheet.name;
+            option.value = sheet.id;
+            sheetSelect.add(option);
+          });
+        });
+      
+      // Event listener for sheet select change
+      sheetSelect.addEventListener("change", function() {
+        var selectedSheetId = this.value;
+        
+        // Fetch data from selected sheet
+        fetch('https://script.google.com/macros/s/AKfycby4aJYYjGSmifBjP6qFXS-nh692lqCLHwNfs8WmynoSS-AdB24tRDRVi9rlhyaCiFoj/exec?sheetId=' + selectedSheetId)
+          .then(response => response.json())
+          .then(data => {
+            // Display data in table
+            sheetData.innerHTML = '';
+            data.forEach(row => {
+              var tr = document.createElement("tr");
+              row.forEach(cell => {
+                var td = document.createElement("td");
+                td.textContent = cell;
+                tr.appendChild(td);
+              });
+              sheetData.appendChild(tr);
+            });
+          });
+      });
+    });
+  </script>
+</body>
 </html>
