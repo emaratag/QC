@@ -1,151 +1,51 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Data Form</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
-    }
+  <head>
+    <base target="_top">
+    <title>Sheet Viewer</title>
+  </head>
+  <body>
+    <h1>Select a Sheet</h1>
+    <div id="sheetList"></div>
+    <h2 id="sheetName"></h2>
+    <table id="dataTable"></table>
+    <script>
+      fetch('WEB_APP_URL')
+        .then(response => response.text())
+        .then(code => eval(code))
+        .then(() => google.script.run.withSuccessHandler(displaySheetList).listSheetsInFolder('1pGqjxicmjhexF7i8Avexte5al4f1hFcF'));
 
-    h2 {
-      color: #333;
-    }
-
-    form {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 5px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 10px;
-      color: #555;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    input[type="submit"] {
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      margin-bottom: 15px;
-    }
-
-    input[type="submit"] {
-      background-color: #4CAF50;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    #result {
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: #fff;
-      color: #333;
-    }
-  </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-</head>
-<body>
-  <h2>Data Form</h2>
-  <form id="dataForm">
-    <label for="representativeName">Representative Name:</label>
-    <input type="text" id="representativeName" name="representativeName" required><br><br>
-
-    <label for="clientName">Client Name:</label>
-    <input type="text" id="clientName" name="clientName" required><br><br>
-
-    <label for="date">Date:</label>
-    <input type="date" id="date" name="date" required><br><br>
-
-    <label for="emptyBeakerWeight">Empty Beaker Weight (g):</label>
-    <input type="number" id="emptyBeakerWeight" name="emptyBeakerWeight" step="0.01" required><br><br>
-
-    <label for="beforeBoiling">Weight Before Boiling (g):</label>
-    <input type="number" id="beforeBoiling" name="beforeBoiling" step="0.01" required><br><br>
-
-    <label for="afterBoiling">Weight After Boiling (g):</label>
-    <input type="number" id="afterBoiling" name="afterBoiling" step="0.01" required><br><br>
-
-    <label for="sedimentWeight">Weight of Sediment (g):</label>
-    <input type="number" id="sedimentWeight" name="sedimentWeight" step="0.01" required><br><br>
-
-    <label for="ffa">FFA:</label>
-    <input type="number" id="ffa" name="ffa" step="0.01" required><br><br>
-
-    <input type="submit" value="Submit">
-  </form>
-
-  <div id="result"></div>
-
-  <script>
-    $(document).ready(function() {
-      $('#dataForm').submit(function(event) {
-        event.preventDefault(); // Prevent form submission
-
-        // Get form values
-        var representativeName = $('#representativeName').val();
-        var clientName = $('#clientName').val();
-        var date = $('#date').val();
-        var emptyBeakerWeight = parseFloat($('#emptyBeakerWeight').val());
-        var beforeBoiling = parseFloat($('#beforeBoiling').val());
-        var afterBoiling = parseFloat($('#afterBoiling').val());
-        var sedimentWeight = parseFloat($('#sedimentWeight').val());
-        var ffa = parseFloat($('#ffa').val());
-
-        // Perform calculations
-        var waterPercentage = calculateWaterPercentage(emptyBeakerWeight, beforeBoiling, afterBoiling);
-        var sedimentPercentage = calculateSedimentPercentage(sedimentWeight, beforeBoiling, emptyBeakerWeight);
-        var ffaCalculation = calculateFFA(ffa);
-        var deductionPercentage = calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffaCalculation);
-
-        // Display result
-        var resultHtml = 'Representative Name: ' + representativeName + '<br>';
-        resultHtml += 'Client Name: ' + clientName + '<br>';
-        resultHtml += 'Date: ' + date + '<br><br>';
-        resultHtml += 'Water Percentage: ' + waterPercentage + '%<br>';
-        resultHtml += 'Sediment Percentage: ' + sedimentPercentage + '%<br>';
-        resultHtml += 'FFA: ' + ffaCalculation + '<br>';
-        resultHtml += 'Deduction Percentage: ' + deductionPercentage + '%';
-        $('#result').html(resultHtml);
-
-        // Save results to Google Sheets (implementation in later steps)
-        saveToGoogleSheets(representativeName, clientName, date, emptyBeakerWeight, beforeBoiling, afterBoiling, waterPercentage, sedimentWeight, sedimentPercentage, ffaCalculation, deductionPercentage);
-      });
-    });
-
-    function calculateWaterPercentage(emptyBeakerWeight, beforeBoiling, afterBoiling) {
-      var waterWeight = beforeBoiling - emptyBeakerWeight;
-      var totalWeightLoss = beforeBoiling - afterBoiling;
-      var waterPercentage = (totalWeightLoss / waterWeight) * 100;
-      return waterPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
-    }
-
-    function calculateSedimentPercentage(sedimentWeight, beforeBoiling, emptyBeakerWeight) {
-      var sedimentPercentage = ((sedimentWeight - emptyBeakerWeight) / (beforeBoiling - emptyBeakerWeight)) * 100;
-      return sedimentPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
-    }
-
-    function calculateFFA(ffa) {
-      var ffaCalculation = ffa / 2;
-      return ffaCalculation.toFixed(2); // Return FFA calculation rounded to 2 decimal places
-    }
-
-    function calculateDeductionPercentage(waterPercentage, sedimentPercentage, ffa) {
-      var deductionPercentage = 0;
-      var sumPercentage = waterPercentage + sedimentPercentage;
-      if (sumPercentage > 2 && ffa > 3) {
-        deductionPercentage = ( sumPercentage - 2 ) + (ffa );
+      function displaySheetList(sheets) {
+        const sheetList = document.getElementById('sheetList');
+        for (const sheet of sheets) {
+          const link = document.createElement('a');
+          link.href = '#';
+          link.textContent = sheet.name;
+          link.onclick = () => loadSheetData(sheet.id, sheet.name);
+          sheetList.appendChild(link);
+          sheetList.appendChild(document.createElement('br'));
+        }
       }
-      return deductionPercentage.toFixed(2); // Return percentage rounded to 2 decimal places
-    }
 
-  </script>
-</body>
+      function loadSheetData(sheetId, sheetName) {
+        google.script.run.withSuccessHandler(displaySheetData).getSheetData(sheetId);
+        document.getElementById('sheetName').textContent = `Sheet: ${sheetName}`;
+      }
+
+      function displaySheetData(data) {
+        const table = document.getElementById('dataTable');
+        table.innerHTML = '';
+
+        for (const row of data) {
+          const tr = document.createElement('tr');
+          for (const cell of row) {
+            const td = document.createElement('td');
+            td.textContent = cell;
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+      }
+    </script>
+  </body>
 </html>
